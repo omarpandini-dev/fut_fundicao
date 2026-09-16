@@ -54,7 +54,7 @@
         <div class="orbit orbit-one" aria-hidden="true"></div>
         <div class="orbit orbit-two" aria-hidden="true"></div>
         <figure class="hero-frame tilt-card">
-          <img src="imagens-produtos-futurafundicao/Maquinas-e-Equipamentos_new.png" alt="Componentes fundidos para máquinas e equipamentos" width="1254" height="1254" fetchpriority="high">
+          <img src="imagens-produtos-futurafundicao/image_front.png" alt="Componentes fundidos para máquinas e equipamentos" width="1254" height="1254" fetchpriority="high">
           <figcaption>
             <span>Engenharia aplicada</span>
             <strong>Feito para<br>performar.</strong>
@@ -78,6 +78,20 @@
         </div>
       </div>
       <div class="manifesto-line" aria-hidden="true"><span>FUNDIÇÃO</span><i></i><span>PRECISÃO</span><i></i><span>PERFORMANCE</span></div>
+    </section>
+
+    <section class="production-film section-shell" aria-label="Da energia à precisão industrial">
+      <div class="production-film-frame reveal">
+        <video class="production-film-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+          <source src="fire_animation.mp4" type="video/mp4">
+        </video>
+        <div class="production-film-shade" aria-hidden="true"></div>
+        <div class="production-film-copy">
+          <span>Fusão <i></i> Engenharia <i></i> Controle</span>
+          <h2>Energia que ganha forma.<br><em>Precisão que ganha escala.</em></h2>
+        </div>
+        <span class="production-film-index" aria-hidden="true">MATÉRIA <i></i> FUTURO</span>
+      </div>
     </section>
 
     <section class="company section-shell" id="empresa" aria-labelledby="company-title">
@@ -263,8 +277,19 @@
 
   <dialog class="product-modal" id="product-modal">
     <button class="modal-close" type="button" aria-label="Fechar">×</button>
-    <img src="" alt="" width="1452" height="1083">
-    <div><span></span><h3></h3><p>Componente fundido para aplicação industrial.</p></div>
+    <div class="modal-media">
+      <div class="modal-image-stage">
+        <img src="" alt="" width="1452" height="1083">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-details"><span></span><h3></h3><p>Componente fundido para aplicação industrial.</p></div>
+      <div class="modal-zoom" role="group" aria-label="Controles de zoom">
+        <button type="button" data-zoom-out aria-label="Afastar imagem" title="Afastar">−</button>
+        <button class="zoom-reset" type="button" data-zoom-reset aria-label="Restaurar zoom" title="Restaurar zoom"><span class="zoom-value">100%</span></button>
+        <button type="button" data-zoom-in aria-label="Aproximar imagem" title="Aproximar">+</button>
+      </div>
+    </div>
   </dialog>
 
   <script src="script.js"></script>

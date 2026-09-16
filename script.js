@@ -70,18 +70,82 @@ document.querySelectorAll("[data-filter-link]").forEach(link => link.addEventLis
 
 const modal = document.querySelector("#product-modal");
 const modalImage = modal.querySelector("img");
-const modalCategory = modal.querySelector("div span");
+const modalMedia = modal.querySelector(".modal-media");
+const modalImageStage = modal.querySelector(".modal-image-stage");
+const modalCategory = modal.querySelector(".modal-details > span");
 const modalTitle = modal.querySelector("h3");
+const zoomOutButton = modal.querySelector("[data-zoom-out]");
+const zoomResetButton = modal.querySelector("[data-zoom-reset]");
+const zoomInButton = modal.querySelector("[data-zoom-in]");
+const zoomValue = modal.querySelector(".zoom-value");
+const minZoom = .5;
+const maxZoom = 3;
+const zoomStep = .25;
+let zoomLevel = 1;
+let fittedImageWidth = 0;
+let fittedImageHeight = 0;
+
+function fitModalImage() {
+  if (!modalImage.naturalWidth || !modalMedia.clientWidth || !modalMedia.clientHeight) return;
+  const padding = innerWidth <= 560 ? 32 : 48;
+  const availableWidth = Math.max(1, modalMedia.clientWidth - padding);
+  const availableHeight = Math.max(1, modalMedia.clientHeight - padding);
+  const fitScale = Math.min(availableWidth / modalImage.naturalWidth, availableHeight / modalImage.naturalHeight, 1);
+  fittedImageWidth = modalImage.naturalWidth * fitScale;
+  fittedImageHeight = modalImage.naturalHeight * fitScale;
+  setModalZoom(zoomLevel, false);
+}
+
+function setModalZoom(nextZoom, preserveCenter = true) {
+  const previousWidth = modalImageStage.scrollWidth || 1;
+  const previousHeight = modalImageStage.scrollHeight || 1;
+  const centerX = (modalMedia.scrollLeft + modalMedia.clientWidth / 2) / previousWidth;
+  const centerY = (modalMedia.scrollTop + modalMedia.clientHeight / 2) / previousHeight;
+  zoomLevel = Math.min(maxZoom, Math.max(minZoom, nextZoom));
+
+  const imageWidth = fittedImageWidth * zoomLevel;
+  const imageHeight = fittedImageHeight * zoomLevel;
+  modalImage.style.width = `${imageWidth}px`;
+  modalImage.style.height = `${imageHeight}px`;
+  modalImageStage.style.width = `${Math.max(modalMedia.clientWidth, imageWidth + 48)}px`;
+  modalImageStage.style.height = `${Math.max(modalMedia.clientHeight, imageHeight + 48)}px`;
+  zoomValue.textContent = `${Math.round(zoomLevel * 100)}%`;
+  zoomOutButton.disabled = zoomLevel <= minZoom;
+  zoomInButton.disabled = zoomLevel >= maxZoom;
+
+  requestAnimationFrame(() => {
+    if (preserveCenter) {
+      modalMedia.scrollLeft = centerX * modalImageStage.scrollWidth - modalMedia.clientWidth / 2;
+      modalMedia.scrollTop = centerY * modalImageStage.scrollHeight - modalMedia.clientHeight / 2;
+    } else {
+      modalMedia.scrollLeft = (modalImageStage.scrollWidth - modalMedia.clientWidth) / 2;
+      modalMedia.scrollTop = (modalImageStage.scrollHeight - modalMedia.clientHeight) / 2;
+    }
+  });
+}
+
 function openProduct(index) {
   const product = products[index];
   modalImage.src = product.image; modalImage.alt = product.name;
   modalCategory.textContent = product.label; modalTitle.textContent = product.name;
+  zoomLevel = 1;
   modal.showModal();
+  if (modalImage.complete) fitModalImage();
 }
 grid.addEventListener("click", event => { const card = event.target.closest(".product-card"); if (card) openProduct(Number(card.dataset.index)); });
 grid.addEventListener("keydown", event => { if ((event.key === "Enter" || event.key === " ") && event.target.matches(".product-card")) { event.preventDefault(); openProduct(Number(event.target.dataset.index)); } });
 modal.querySelector(".modal-close").addEventListener("click", () => modal.close());
 modal.addEventListener("click", event => { if (event.target === modal) modal.close(); });
+modalImage.addEventListener("load", fitModalImage);
+zoomOutButton.addEventListener("click", () => setModalZoom(zoomLevel - zoomStep));
+zoomResetButton.addEventListener("click", () => setModalZoom(1, false));
+zoomInButton.addEventListener("click", () => setModalZoom(zoomLevel + zoomStep));
+modal.addEventListener("keydown", event => {
+  if (event.key === "+" || event.key === "=") setModalZoom(zoomLevel + zoomStep);
+  if (event.key === "-") setModalZoom(zoomLevel - zoomStep);
+  if (event.key === "0") setModalZoom(1, false);
+});
+addEventListener("resize", () => { if (modal.open) fitModalImage(); });
 
 const menuButton = document.querySelector(".menu-toggle");
 const mainNav = document.querySelector(".main-nav");
@@ -121,4 +185,24 @@ if (finePointer) {
 }
 
 document.querySelector("#year").textContent = new Date().getFullYear();
+
+const productionFilm = document.querySelector(".production-film-video");
+if (productionFilm) {
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  const syncFilmPlayback = isVisible => {
+    if (reducedMotion.matches || !isVisible) {
+      productionFilm.pause();
+      return;
+    }
+    productionFilm.play().catch(() => {});
+  };
+
+  const filmObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => syncFilmPlayback(entry.isIntersecting));
+  }, { threshold: .15 });
+
+  reducedMotion.addEventListener("change", () => syncFilmPlayback(productionFilm.getBoundingClientRect().top < innerHeight));
+  filmObserver.observe(productionFilm);
+}
+
 renderProducts();
